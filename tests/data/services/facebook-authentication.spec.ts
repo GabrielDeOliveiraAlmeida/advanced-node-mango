@@ -25,7 +25,7 @@ class LoadFacebookUserApiSpy implements LoadFacebookUserApi {
 }
 
 describe('FaceboookAuthentication', () => {
-  it('', async () => {
+  it('should call LoadFacebookAPI with correct params', async () => {
     const loadFacebookUserApi = new LoadFacebookUserApiSpy()
     const sut = new FacebookAuthenticationService(loadFacebookUserApi)
 
