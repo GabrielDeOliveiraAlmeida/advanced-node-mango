@@ -1,6 +1,7 @@
-import { AuthenticationError } from '@/domain/errors'
-import { FacebookAuthenticationService } from '@/data/services'
+
 import { LoadFacebookUserApi } from '@/data/contracts/apis'
+import { FacebookAuthenticationService } from '@/data/services'
+import { AuthenticationError } from '@/domain/errors'
 
 import { mock } from 'jest-mock-extended'
 

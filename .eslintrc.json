@@ -1,9 +1,31 @@
 {
-  "extends": ["standard-with-typescript"],
+  "extends": [
+    "standard-with-typescript"],
+  "plugins": ["eslint-plugin-import-helpers"],
   "parserOptions": {
     "project": "./tsconfig.json"
   },
   "rules": {
+    "import-helpers/order-imports": [
+      "warn",
+      {
+        "newlinesBetween": "always",
+        "groups": [
+          "/^@\//",
+          "/^@shared/",
+          [
+            "parent",
+            "sibling",
+            "index"
+          ],
+          "module"
+        ],
+        "alphabetize": {
+          "order": "asc",
+          "ignoreCase": true
+        }
+      }
+    ],
     "@typescript-eslint/consistent-type-definitions": "off",
     "@typescript-eslint/no-namespace": "off",
     "@typescript-eslint/return-await": "off",
