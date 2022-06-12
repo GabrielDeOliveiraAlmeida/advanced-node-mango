@@ -4,7 +4,7 @@ import { AccessToken } from '@/domain/models'
 export interface FacebookAuthentication {
   perform: (
     token: FacebookAuthentication.Params
-  ) => FacebookAuthentication.Result
+  ) => Promise<FacebookAuthentication.Result>
 }
 
 export namespace FacebookAuthentication {
