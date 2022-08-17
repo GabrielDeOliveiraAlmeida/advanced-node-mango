@@ -1,19 +1,10 @@
 
 import { PgUser } from '@/infra/postgress/entities'
 import { PgUserAccountRepository } from '@/infra/postgress/repos'
+import { makeFakeDb } from '@/tests/infra/postgress/mocks'
 
-import { IBackup, IMemoryDb, newDb } from 'pg-mem'
+import { IBackup } from 'pg-mem'
 import { getConnection, getRepository, Repository } from 'typeorm'
-
-const makeFakeDb = async (entities?: any[]): Promise<IMemoryDb> => {
-  const db = newDb()
-  const connection = await db.adapters.createTypeormConnection({
-    type: 'postgres',
-    entities: entities ?? ['src/infra/postgress/entities/index.ts']
-  })
-  await connection.synchronize()
-  return db
-}
 
 describe('PgUserAccountRepository', () => {
   describe('load', () => {
