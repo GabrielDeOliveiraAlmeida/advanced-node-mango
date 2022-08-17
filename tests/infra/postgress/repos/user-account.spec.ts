@@ -7,26 +7,42 @@ import { IBackup } from 'pg-mem'
 import { getConnection, getRepository, Repository } from 'typeorm'
 
 describe('PgUserAccountRepository', () => {
+  let sut: PgUserAccountRepository
+  let pgUserRepo: Repository<PgUser>
+  let backup: IBackup
+
+  beforeEach(() => {
+    backup.restore()
+    sut = new PgUserAccountRepository()
+  })
+
+  beforeAll(async () => {
+    const db = await makeFakeDb([PgUser])
+    backup = db.backup()
+    pgUserRepo = getRepository(PgUser)
+  })
+
+  afterAll(async () => {
+    await getConnection().close()
+  })
+
   describe('load', () => {
-    let sut: PgUserAccountRepository
-    let pgUserRepo: Repository<PgUser>
-    let backup: IBackup
+    it('should return an account if email exists', async () => {
+      await pgUserRepo.save({ email: 'any_email' })
 
-    beforeEach(() => {
-      backup.restore()
-      sut = new PgUserAccountRepository()
+      const account = await sut.load({ email: 'any_email' })
+
+      expect(account).toEqual({ id: '1' })
     })
 
-    beforeAll(async () => {
-      const db = await makeFakeDb([PgUser])
-      backup = db.backup()
-      pgUserRepo = getRepository(PgUser)
-    })
+    it('should return undefined if email not exists', async () => {
+      const account = await sut.load({ email: 'any_email' })
 
-    afterAll(async () => {
-      await getConnection().close()
+      expect(account).toBeUndefined()
     })
+  })
 
+  describe('load', () => {
     it('should return an account if email exists', async () => {
       await pgUserRepo.save({ email: 'any_email' })
 
