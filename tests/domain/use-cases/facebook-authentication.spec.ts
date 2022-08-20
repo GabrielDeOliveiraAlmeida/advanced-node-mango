@@ -47,12 +47,12 @@ describe('FaceboookAuthentication', () => {
     expect(facebookApi.loadUser).toHaveBeenCalledTimes(1)
   })
 
-  it('should return AuthenticationError  when LoadFAcebookAPI return undefined', async () => {
+  it('should throw AuthenticationError  when LoadFAcebookAPI return undefined', async () => {
     facebookApi.loadUser.mockResolvedValueOnce(undefined)
 
-    const result = await sut({ token })
+    const promise = sut({ token })
 
-    expect(result).toEqual(new AuthenticationError())
+    await expect(promise).rejects.toThrow(new AuthenticationError())
   })
 
   it('should call LoadUserAccountRepo when LoadFacebookUserAPI returns data', async () => {
@@ -92,7 +92,7 @@ describe('FaceboookAuthentication', () => {
   it('should return AccessToken on success', async () => {
     const authResult = await sut({ token })
 
-    expect(authResult).toEqual(new AccessToken('any_generated_token'))
+    expect(authResult).toEqual({ accessToken: ('any_generated_token') })
     expect(crypto.generateToken).toHaveBeenCalledTimes(1)
   })
 
