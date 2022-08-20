@@ -1,10 +1,9 @@
 module.exports = {
-  type: 'mongodb',
-  useNewUrlParser: true,
-  url: process.env.DB_URL,
-  ssl: true,
-  authSource: 'admin',
-  entities: [
-    `${process.env.TS_NODE_DEV === undefined ? 'dist' : 'src'}/infra/db/mongodb/entities/index.{js,ts}`
-  ]
+  type: 'postgres',
+  host: process.env.POSTGRES_HOST,
+  port: Number(process.env.POSTGRES_PORT) ?? 5432,
+  username: process.env.POSTGRES_USERNAME,
+  database: process.env.POSTGRES_DATABASE,
+  password: process.env.POSTGRES_PASSWORD,
+  entities: ['dist/infra/postgress/entities/index.js']
 }
