@@ -1,3 +1,4 @@
+import { ForbiddenError } from '@/application/errors'
 import { HttpResponse, forbidden } from '@/application/helpers'
 import { RequiredStringValidator } from '@/application/validations'
 import { Authorize } from '@/domain/use-cases'
@@ -9,7 +10,11 @@ export class AuthenticationMiddleware {
   async handle ({ authorization }: HttpRequest): Promise<HttpResponse<Error> | undefined> {
     const error = new RequiredStringValidator(authorization, 'authorization').validate()
     if (error !== undefined) return forbidden()
-    await this.authorize({ token: authorization })
+    try {
+      await this.authorize({ token: authorization })
+    } catch {
+      return forbidden()
+    }
   }
 }
 
@@ -30,19 +35,28 @@ describe('AuthenticationMiddleware', () => {
   it('should return 403 if authorization is empty', async () => {
     const httpResponse = await sut.handle({ authorization: '' })
 
-    expect(httpResponse).toEqual(forbidden())
+    expect(httpResponse).toEqual({
+      statusCode: 403,
+      data: new ForbiddenError()
+    })
   })
 
   it('should return 403 if authorization is null', async () => {
     const httpResponse = await sut.handle({ authorization: null as any })
 
-    expect(httpResponse).toEqual(forbidden())
+    expect(httpResponse).toEqual({
+      statusCode: 403,
+      data: new ForbiddenError()
+    })
   })
 
   it('should return 403 if authorization is undefined', async () => {
     const httpResponse = await sut.handle({ authorization: undefined as any })
 
-    expect(httpResponse).toEqual(forbidden())
+    expect(httpResponse).toEqual({
+      statusCode: 403,
+      data: new ForbiddenError()
+    })
   })
 
   it('should call authorize with correct input', async () => {
@@ -50,5 +64,16 @@ describe('AuthenticationMiddleware', () => {
 
     expect(authorize).toHaveBeenCalledWith({ token: authorization })
     expect(authorize).toHaveBeenCalledTimes(1)
+  })
+
+  it('should return 403 if authorize throw', async () => {
+    authorize.mockRejectedValueOnce(new Error('authorize_error'))
+
+    const httpResponse = await sut.handle({ authorization })
+
+    expect(httpResponse).toEqual({
+      statusCode: 403,
+      data: new ForbiddenError()
+    })
   })
 })
