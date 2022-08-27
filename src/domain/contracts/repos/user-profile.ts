@@ -4,7 +4,8 @@ export interface SaveUserPicture {
 
 export namespace SaveUserPicture {
   export type Input = {
-    pictureUrl: string | undefined
+    id: string
+    pictureUrl?: string
     initials?: string
   }
 }
