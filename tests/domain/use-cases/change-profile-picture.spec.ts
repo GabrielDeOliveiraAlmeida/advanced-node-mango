@@ -20,6 +20,7 @@ describe('ChangeProfilePicture', () => {
     crypto = mock()
     crypto.uuid.mockReturnValue(uuid)
     userProfileRepo = mock()
+    userProfileRepo.load.mockResolvedValue({ name: 'Gabriel De Oliveira Almeida' })
   })
 
   beforeEach(() => {
@@ -49,7 +50,43 @@ describe('ChangeProfilePicture', () => {
   it('should not call UploadFile when file is undefined', async () => {
     await sut({ id: 'any_id', file: undefined })
 
-    expect(userProfileRepo.savePicture).toHaveBeenCalledWith({ pictureUrl: undefined })
+    expect(userProfileRepo.savePicture).toHaveBeenCalledWith({ pictureUrl: undefined, initials: 'GA' })
+    expect(userProfileRepo.savePicture).toHaveBeenCalledTimes(1)
+  })
+
+  it('should not call UploadFile when file is undefined', async () => {
+    userProfileRepo.load.mockResolvedValue({ name: 'gabriel De oliveira almeida' })
+
+    await sut({ id: 'any_id', file: undefined })
+
+    expect(userProfileRepo.savePicture).toHaveBeenCalledWith({ pictureUrl: undefined, initials: 'GA' })
+    expect(userProfileRepo.savePicture).toHaveBeenCalledTimes(1)
+  })
+
+  it('should not call UploadFile when file is undefined', async () => {
+    userProfileRepo.load.mockResolvedValue({ name: 'gabriel' })
+
+    await sut({ id: 'any_id', file: undefined })
+
+    expect(userProfileRepo.savePicture).toHaveBeenCalledWith({ pictureUrl: undefined, initials: 'GA' })
+    expect(userProfileRepo.savePicture).toHaveBeenCalledTimes(1)
+  })
+
+  it('should not call UploadFile when file is undefined', async () => {
+    userProfileRepo.load.mockResolvedValue({ name: 'g' })
+
+    await sut({ id: 'any_id', file: undefined })
+
+    expect(userProfileRepo.savePicture).toHaveBeenCalledWith({ pictureUrl: undefined, initials: 'G' })
+    expect(userProfileRepo.savePicture).toHaveBeenCalledTimes(1)
+  })
+
+  it('should not call UploadFile when file is undefined', async () => {
+    userProfileRepo.load.mockResolvedValue({ name: undefined })
+
+    await sut({ id: 'any_id', file: undefined })
+
+    expect(userProfileRepo.savePicture).toHaveBeenCalledWith({ pictureUrl: undefined, initials: undefined })
     expect(userProfileRepo.savePicture).toHaveBeenCalledTimes(1)
   })
 

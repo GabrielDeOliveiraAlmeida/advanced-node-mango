@@ -5,11 +5,12 @@ export interface SaveUserPicture {
 export namespace SaveUserPicture {
   export type Input = {
     pictureUrl: string | undefined
+    initials?: string
   }
 }
 
 export interface LoadUserProfile {
-  load: (params: LoadUserProfile.Input) => Promise<void>
+  load: (params: LoadUserProfile.Input) => Promise<LoadUserProfile.Output>
 }
 
 export namespace LoadUserProfile {
@@ -17,8 +18,7 @@ export namespace LoadUserProfile {
     id: string
   }
 
-  export type Output = undefined | {
-    id: string
+  export type Output = {
     name?: string
   }
 }
