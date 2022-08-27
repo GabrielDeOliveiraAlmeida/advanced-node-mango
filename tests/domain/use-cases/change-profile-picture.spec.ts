@@ -1,11 +1,11 @@
-import { mock } from 'jest-mock-extended'
+import { mock, MockProxy } from 'jest-mock-extended'
 
-type Setup = (fileStorage: UploadFile) => ChangeProfilePicture
+type Setup = (fileStorage: UploadFile, crypto: UUIDGenerator) => ChangeProfilePicture
 type Input = {id: string, file: Buffer}
 type ChangeProfilePicture = (input: Input) => Promise<void>
 
-const setupChangeProfilePicture: Setup = fileStorage => async ({ id, file }): Promise<void> => {
-  await fileStorage.upload({ file, key: id })
+const setupChangeProfilePicture: Setup = (fileStorage, crypto) => async ({ id, file }): Promise<void> => {
+  await fileStorage.upload({ file, key: crypto.uuid({ key: id }) })
 }
 
 interface UploadFile {
@@ -16,15 +16,38 @@ namespace UploadFile {
   export type Input = {file: Buffer, key: string}
 }
 
-describe('ChangeProfilePicture', () => {
-  it('should call UploadFile with correct input', async () => {
-    const file: Buffer = Buffer.from('any_buffer')
-    const fileStorage = mock<UploadFile>()
-    const sut = setupChangeProfilePicture(fileStorage)
+interface UUIDGenerator {
+  uuid: (input: UUIDGenerator.Input) => string
+}
 
+namespace UUIDGenerator {
+  export type Input = { key: string}
+  export type Output = string
+}
+
+describe('ChangeProfilePicture', () => {
+  let uuid: string
+  let file: Buffer
+  let fileStorage: MockProxy<UploadFile>
+  let crypto: MockProxy<UUIDGenerator>
+  let sut: ChangeProfilePicture
+
+  beforeAll(() => {
+    uuid = 'any_unique_id'
+    file = Buffer.from('any_buffer')
+    fileStorage = mock<UploadFile>()
+    crypto = mock<UUIDGenerator>()
+    crypto.uuid.mockReturnValue(uuid)
+  })
+
+  beforeEach(() => {
+    sut = setupChangeProfilePicture(fileStorage, crypto)
+  })
+
+  it('should call UploadFile with correct input', async () => {
     await sut({ id: 'any_id', file })
 
-    expect(fileStorage.upload).toHaveBeenCalledWith({ file, key: 'any_id' })
+    expect(fileStorage.upload).toHaveBeenCalledWith({ file, key: uuid })
     expect(fileStorage.upload).toHaveBeenCalledTimes(1)
   })
 })
