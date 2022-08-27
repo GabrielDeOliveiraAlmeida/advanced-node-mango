@@ -7,3 +7,18 @@ export namespace SaveUserPicture {
     pictureUrl: string | undefined
   }
 }
+
+export interface LoadUserProfile {
+  load: (params: LoadUserProfile.Input) => Promise<void>
+}
+
+export namespace LoadUserProfile {
+  export type Input = {
+    id: string
+  }
+
+  export type Output = undefined | {
+    id: string
+    name?: string
+  }
+}
