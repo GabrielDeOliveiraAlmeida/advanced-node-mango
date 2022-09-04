@@ -49,7 +49,7 @@ describe('PgUserAccountRepository', () => {
     })
 
     it('should load user profile', async () => {
-      const userProfile = await sut.load({ id: id.toString() })
+      const userProfile = await sut.load({ id: '1' })
 
       expect(userProfile).toBeUndefined()
     })
