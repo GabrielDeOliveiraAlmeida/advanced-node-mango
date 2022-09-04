@@ -25,6 +25,11 @@ export const ok = <T = any> (data: T): HttpResponse<T> => ({
   data
 })
 
+export const noContent = (): HttpResponse => ({
+  statusCode: 204,
+  data: null
+})
+
 export const forbidden = (): HttpResponse<Error> => ({
   statusCode: 403,
   data: new ForbiddenError()
