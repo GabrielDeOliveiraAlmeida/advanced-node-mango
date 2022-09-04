@@ -1,5 +1,5 @@
 import { HttpResponse, forbidden, ok } from '@/application/helpers'
-import { RequiredStringValidator } from '@/application/validations'
+import { RequiredString } from '@/application/validations'
 
 type HttpRequest = { authorization: string}
 type Model = Error | { userId: string}
@@ -19,7 +19,7 @@ export class AuthenticationMiddleware {
   }
 
   private validate ({ authorization }: HttpRequest): boolean {
-    const error = new RequiredStringValidator(authorization, 'authorization').validate()
+    const error = new RequiredString(authorization, 'authorization').validate()
     return error === undefined
   }
 }
