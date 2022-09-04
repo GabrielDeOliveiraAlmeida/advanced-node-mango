@@ -15,7 +15,7 @@ class AwsS3FileStorage {
     })
   }
 
-  async upload ({ file, key }: UploadFile.Input): Promise<void> {
+  async upload ({ file, key }: UploadFile.Input): Promise<UploadFile.Output> {
     const s3 = new S3()
     await s3.putObject({
       Bucket: this.bucket,
@@ -23,6 +23,8 @@ class AwsS3FileStorage {
       Body: file,
       ACL: 'public-read'
     }).promise()
+
+    return `https://${this.bucket}.s3.amazonaws.com/${encodeURIComponent(key)}`
   }
 }
 
@@ -81,5 +83,17 @@ describe('AWSS3FileStorage', () => {
       }
     })
     expect(config.update).toHaveBeenCalledTimes(1)
+  })
+
+  it('should return image url', async () => {
+    const imageUrl = await sut.upload({ key, file })
+
+    expect(imageUrl).toBe(`https://${bucket}.s3.amazonaws.com/${key}`)
+  })
+
+  it('should return encoded image url', async () => {
+    const imageUrl = await sut.upload({ key: 'any key', file })
+
+    expect(imageUrl).toBe(`https://${bucket}.s3.amazonaws.com/any%20key`)
   })
 })
