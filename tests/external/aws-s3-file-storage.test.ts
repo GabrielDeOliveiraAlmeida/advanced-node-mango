@@ -13,16 +13,17 @@ describe('AWS S3 File Storage', () => {
       env.s3.bucket
     )
   })
-  it('should return a Facebook User if token is valid', async () => {
+
+  it('should upload an delete from s3', async () => {
     const onePixelImage = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIW2NYqNPyHwAFFAJR4sxn2wAAAABJRU5ErkJggg=='
     const file = Buffer.from(onePixelImage, 'base64')
-    const key = 'any_key'
+    const fileName = 'any_fileName'
 
-    const pictureUrl = await sut.upload({ key, file })
+    const pictureUrl = await sut.upload({ fileName: fileName, file })
 
     expect((await axios.get(pictureUrl)).status).toBe(200)
 
-    await sut.delete({ key })
+    await sut.delete({ fileName: fileName })
 
     await expect(axios.get(pictureUrl)).rejects.toThrow()
   })
