@@ -1,8 +1,8 @@
-import { Controller, SaveProfileController } from '@/application/controllers'
+import { Controller, SavePictureController } from '@/application/controllers'
 import { AllowedMimeTypes, MaxFileSize, Required, RequiredBuffer } from '@/application/validations'
 
 describe('SavePictureController', () => {
-  let sut: SaveProfileController
+  let sut: SavePictureController
   let buffer: Buffer
   let mimeType: string
   let userId: string
@@ -18,14 +18,14 @@ describe('SavePictureController', () => {
   })
 
   beforeEach(() => {
-    sut = new SaveProfileController(changeProfilePicture)
+    sut = new SavePictureController(changeProfilePicture)
   })
 
   it('should extends Controllers', async () => {
     expect(sut).toBeInstanceOf(Controller)
   })
 
-  it('should build Validators correctly', async () => {
+  it('should build Validators correctly on save', async () => {
     const validators = sut.buildValidators({ file, userId })
 
     expect(validators).toEqual([
@@ -34,6 +34,12 @@ describe('SavePictureController', () => {
       new AllowedMimeTypes(['png', 'jpg'], mimeType),
       new MaxFileSize(5, buffer)
     ])
+  })
+
+  it('should build Validators correctly on delete', async () => {
+    const validators = sut.buildValidators({ file: undefined, userId })
+
+    expect(validators).toEqual([])
   })
 
   it('should call ChangeProfilePicture with correct input', async () => {

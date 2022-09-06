@@ -5,20 +5,23 @@ import { ChangeProfilePicture } from '@/domain/use-cases'
 
 import { Controller } from './controller'
 
-type HttpRequest = { file: { buffer: Buffer, mimeType: string }, userId: string}
-type Model = Error | { initials?: string, pictureUrl?: string}
+type HttpRequest = { file?: { buffer: Buffer, mimeType: string }, userId: string}
+type Model = { initials?: string, pictureUrl?: string}
 
-export class SaveProfileController extends Controller {
+export class SavePictureController extends Controller {
   constructor (private readonly changeProfilePicture: ChangeProfilePicture) {
     super()
   }
 
   override async perform ({ file, userId }: HttpRequest): Promise<HttpResponse<Model>> {
-    const data = await this.changeProfilePicture({ id: userId, file })
-    return ok(data)
+    const { initials, pictureUrl } = await this.changeProfilePicture({ id: userId, file })
+    return ok({ initials, pictureUrl })
   }
 
   override buildValidators ({ file }: HttpRequest): Validator[] {
+    if (file === undefined) {
+      return []
+    }
     return [
       ...Builder.of({ value: file, fieldName: 'file' })
         .required()
