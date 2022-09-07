@@ -1,5 +1,14 @@
+import { mocked } from 'ts-jest/utils'
+import { createConnection, getConnectionManager } from 'typeorm'
 
-// eslint-disable-next-line @typescript-eslint/no-extraneous-class
+jest.mock('typeorm', () => ({
+  Entity: jest.fn(),
+  PrimaryGeneratedColumn: jest.fn(),
+  Column: jest.fn(),
+  createConnection: jest.fn(),
+  getConnectionManager: jest.fn()
+}))
+
 class PgConnection {
   private static instance?: PgConnection
   private constructor () {
@@ -10,6 +19,11 @@ class PgConnection {
     if (PgConnection.instance === undefined) PgConnection.instance = new PgConnection()
     return PgConnection.instance
   }
+
+  async connect (): Promise<void> {
+    const connection = await createConnection()
+    connection.createQueryRunner()
+  }
 }
 
 describe('PgConnection', () => {
@@ -18,5 +32,25 @@ describe('PgConnection', () => {
     const sut2 = PgConnection.getInstance()
 
     expect(sut).toBe(sut2)
+  })
+
+  it('should create a new Connection', async () => {
+    const getConnectionManagerSpy = jest.fn().mockReturnValueOnce({
+      has: jest.fn().mockReturnValueOnce(false)
+    })
+    const createQueryRunnerSpy = jest.fn()
+    const createConnectionSpy = jest.fn().mockResolvedValueOnce({
+      createQueryRunner: createQueryRunnerSpy
+    })
+    mocked(createConnection).mockImplementationOnce(createConnectionSpy)
+    mocked(getConnectionManager).mockImplementationOnce(getConnectionManagerSpy)
+    const sut = PgConnection.getInstance()
+
+    await sut.connect()
+
+    expect(createConnectionSpy).toHaveBeenCalledWith()
+    expect(createConnectionSpy).toHaveBeenCalledTimes(1)
+    expect(createQueryRunnerSpy).toHaveBeenCalledWith()
+    expect(createQueryRunnerSpy).toHaveBeenCalledTimes(1)
   })
 })
