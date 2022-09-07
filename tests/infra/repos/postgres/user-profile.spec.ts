@@ -1,13 +1,15 @@
 
-import { PgUserProfileRepository } from '@/infra/repos/postgres'
+import { PgUserProfileRepository, PgRepository } from '@/infra/repos/postgres'
 import { PgUser } from '@/infra/repos/postgres/entities'
+import { PgConnection } from '@/infra/repos/postgres/helpers'
 import { makeFakeDb } from '@/tests/infra/repos/postgres/mocks'
 
 import { IBackup } from 'pg-mem'
-import { getConnection, getRepository, Repository } from 'typeorm'
+import { Repository } from 'typeorm'
 
 describe('PgUserAccountRepository', () => {
   let sut: PgUserProfileRepository
+  let connection: PgConnection
   let pgUserRepo: Repository<PgUser>
   let backup: IBackup
 
@@ -17,13 +19,14 @@ describe('PgUserAccountRepository', () => {
   })
 
   beforeAll(async () => {
+    connection = PgConnection.getInstance()
     const db = await makeFakeDb([PgUser])
     backup = db.backup()
-    pgUserRepo = getRepository(PgUser)
+    pgUserRepo = connection.getRepository(PgUser)
   })
 
   afterAll(async () => {
-    await getConnection().close()
+    await connection.disconnect()
   })
 
   describe('savePicture', () => {
@@ -37,6 +40,10 @@ describe('PgUserAccountRepository', () => {
         initials: null
       })
     })
+  })
+
+  it('should extends PgRepository', async () => {
+    expect(sut).toBeInstanceOf(PgRepository)
   })
 
   describe('load', () => {
