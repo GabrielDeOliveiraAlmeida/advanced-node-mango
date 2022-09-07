@@ -1,5 +1,5 @@
 import { mocked } from 'ts-jest/utils'
-import { Connection, createConnection, getConnection, getConnectionManager } from 'typeorm'
+import { Connection, createConnection, getConnection, getConnectionManager, QueryRunner } from 'typeorm'
 
 jest.mock('typeorm', () => ({
   Entity: jest.fn(),
@@ -12,6 +12,7 @@ jest.mock('typeorm', () => ({
 
 class PgConnection {
   private static instance?: PgConnection
+  private query?: QueryRunner
   private constructor () {
 
   }
@@ -28,8 +29,12 @@ class PgConnection {
     } else {
       connection = await createConnection()
     }
+    this.query = connection.createQueryRunner()
+  }
 
-    connection.createQueryRunner()
+  async disconnect (): Promise<void> {
+    await getConnection().close()
+    this.query = undefined
   }
 }
 
@@ -39,10 +44,12 @@ describe('PgConnection', () => {
   let createQueryRunnerSpy: jest.Mock
   let createConnectionSpy: jest.Mock
   let hasSpy: jest.Mock
+  let closeSpy: jest.Mock
   let sut: PgConnection
 
   beforeAll(() => {
     hasSpy = jest.fn().mockReturnValue(true)
+    closeSpy = jest.fn()
     getConnectionManagerSpy = jest.fn().mockReturnValue({
       has: hasSpy
     })
@@ -51,7 +58,8 @@ describe('PgConnection', () => {
       createQueryRunner: createQueryRunnerSpy
     })
     getConnectionSpy = jest.fn().mockReturnValue({
-      createQueryRunner: createQueryRunnerSpy
+      createQueryRunner: createQueryRunnerSpy,
+      close: closeSpy
     })
     mocked(createConnection).mockImplementation(createConnectionSpy)
     mocked(getConnection).mockImplementation(getConnectionSpy)
@@ -81,13 +89,19 @@ describe('PgConnection', () => {
   })
 
   it('should use an existing connection', async () => {
-    sut = PgConnection.getInstance()
-
     await sut.connect()
 
     expect(getConnectionSpy).toHaveBeenCalledWith()
     expect(getConnectionSpy).toHaveBeenCalledTimes(1)
     expect(createQueryRunnerSpy).toHaveBeenCalledWith()
     expect(createQueryRunnerSpy).toHaveBeenCalledTimes(1)
+  })
+
+  it('should close connection', async () => {
+    await sut.connect()
+    await sut.disconnect()
+
+    expect(closeSpy).toHaveBeenCalledWith()
+    expect(closeSpy).toHaveBeenCalledTimes(1)
   })
 })
